@@ -9,7 +9,7 @@ cv2.namedWindow('Check Face Match',cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Check Face Match',600,600)
 
 
-reference_img = cv2.imread("testpic.jpg")
+reference_img = cv2.imread("testpic2.jpg")
 
 counter = 0
 face_match = False
@@ -21,11 +21,12 @@ def check_face(frame: MatLike)-> None:
     global face_match
 
     try:
-        print('Starting Comparison')
-        if DeepFace.verify(frame.copy(),reference_img.copy())['verified'] :
+        if DeepFace.verify(frame,reference_img.copy())['verified'] :
             face_match = True
+            print('Matching')
         else:
             face_match = False
+            print('Not Matching')
 
     except ValueError:
         pass
@@ -35,22 +36,24 @@ while True:
     ret, frame = cap.read()
 
     if ret:
-        try:
-            threading.Thread(target=check_face, args=(frame.copy(),)).start()
-        except ValueError:
-            pass
+        if counter % 5 == 0:
+            try:
+                threading.Thread(target=check_face, args=(frame,)).start()
+            except ValueError:
+                pass
         counter +=1 
 
-        cv2.imshow('Check Face Match',frame)
 
 
         if face_match:
+
             cv2.putText(frame,"Match",(20,450),
                         cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),3)
         else:
             cv2.putText(frame,"No Match",(20,450),
                         cv2.FONT_HERSHEY_SIMPLEX,2,(0,0,255),3)
 
+        cv2.imshow('Check Face Match',frame)
 
     key = cv2.waitKey(1)
     if key == ord('q'):
